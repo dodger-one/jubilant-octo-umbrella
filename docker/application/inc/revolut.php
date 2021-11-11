@@ -3,6 +3,14 @@
 $theusername = '';
 $thedate = '';
 
+function hellocheck($theuri){
+    if (isset($theuri[1]) && $theuri[1] != 'hello') {
+        header("HTTP/1.1 404 Not Found");
+        //echo ( 'First parameter should be \'hello\'' . "\n" ) ;
+        http_response_code(404);
+        exit();
+    }
+}
 
 function checkUserName($theusername) {
         if ( ! $theusername || strlen($theusername) < 3) {
@@ -134,7 +142,7 @@ function putUserData($theuri) {
 //things to do
 //  * OK: extract all the functions from index.php (create a revolut.php?)
 //  * OK: the function insertOrUpdate should do raw upsert, the logic must be on revolut.php
-//  * the date of birth should be checked (not greater than actual date...
+//  * OK: the date of birth should be checked (not greater than actual date...
 // *************************************************************************************
 // *************************************************************************************
 // *************************************************************************************

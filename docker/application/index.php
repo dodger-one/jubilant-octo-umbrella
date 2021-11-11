@@ -8,11 +8,7 @@ require __DIR__ . "/inc/bootstrap.php";
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $uri = explode( '/', $uri );
  
-if (isset($uri[1]) && $uri[1] != 'hello') {
-    //header("HTTP/1.1 404 Not Found");
-    echo ( 'First parameter should be \'hello\'' . "\n" ) ;
-    exit();
-}
+hellocheck($uri);
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -30,7 +26,6 @@ switch ($method)
         case 'PUT':
                 //$_PUT = parseInput();
         
-                echo "PUT request method\n";
                 //echo print_r($_PUT, true);
                 putUserData($uri);
                 break;
