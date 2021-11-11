@@ -14,10 +14,10 @@ function hellocheck($theuri){
 
 function checkUserName($theusername) {
         if ( ! $theusername || strlen($theusername) < 3) {
-            echo ('Username must have at least 2 letters ->' . $theusername .  "<-\n") ;
+            //echo ('Username must have at least 2 letters ->' . $theusername .  "<-\n") ;
             return 1;
         } elseif ( ! ctype_alpha($theusername) ) {
-            echo ('Username should have only letters ->' . $theusername .  "<-\n") ;
+            //echo ('Username should have only letters ->' . $theusername .  "<-\n") ;
             return 1;
         } else {
             return 0;
@@ -33,17 +33,23 @@ function getUserData($theuri) {
             $sql = "SELECT * FROM revolut_test where thename = '" . $theusername . "';";
             $alldata = $pg->getRows($sql);
             if ( count($alldata) > 1 ) {
-                echo ('ERROR, more than 1 ressult found: ' . count($alldata)) ;
+                //echo ('ERROR, more than 1 ressult found: ' . count($alldata)) ;
+                header("HTTP/1.1 400 Bad Request");
+                http_response_code(400);
                 exit();
             } else if (count($alldata) == 0) {
-                echo ('User not found') ;
+                //echo ('User not found') ;
+                header("HTTP/1.1 400 Bad Request");
+                http_response_code(400);
                 exit();
             } else {
                 sayMessage($alldata[0]);
             }
         // this part can go inside testing part
         } else {
-            echo ('User does not exists or is not valid') ;
+            //echo ('User does not exists or is not valid') ;
+            header("HTTP/1.1 400 Bad Request");
+            http_response_code(400);
             exit();
         }
 }
@@ -76,17 +82,18 @@ function sayMessage($theinfo)
 
         }
         echo json_encode($message) . "\n";
-//        exit();
+        http_response_code(200);
+        exit();
 }
 
 function dateGreater($thedate)
 {
         $today = date('Y-m-d');
         if($thedate > $today) {
-            echo('greater');
+            //echo('greater');
             return 1;
         } else {
-            echo('lower');
+            //echo('lower');
             return 0;
         }
 }
@@ -94,7 +101,9 @@ function dateGreater($thedate)
 function putUserData($theuri) {
         $pg = new PgSql();
         if ( !isset($theuri[2]) || ! preg_match("/^[a-zA-Z]{2,99}{\"dateOfBirth\":\"[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\"}$/",$theuri[2]) ) {
-            echo ( 'Second parameter should be \'username{"dateOfBirth":"YYYY-MM-DD"}\'' . "\n" ) ;
+            //echo ( 'Second parameter should be \'username{"dateOfBirth":"YYYY-MM-DD"}\'' . "\n" ) ;
+            header("HTTP/1.1 400 Bad Request");
+            http_response_code(400);
             exit();
         } else {
             $wholedata = preg_split("/({|}|:)/", $theuri[2], -1, PREG_SPLIT_NO_EMPTY) ;
@@ -104,11 +113,16 @@ function putUserData($theuri) {
 
             $userexists = checkUserName($theusername);
             if ( $userexists <> 0 ) {
-                echo ('Username invalid ' . "\n") ;
+                //echo ('Username invalid ' . "\n") ;
+                header("HTTP/1.1 400 Bad Request");
+                http_response_code(400);
                 exit();
             }
             if ( $dateofbirth <> '"dateOfBirth"') {
-                echo ('you miss something important ->' . $dateofbirth . "<-\n" ) ;
+                //echo ('you miss something important ->' . $dateofbirth . "<-\n" ) ;
+                header("HTTP/1.1 400 Bad Request");
+                http_response_code(400);
+
                 exit();
             }
             if (preg_match("/^\"[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\"$/",$thedate)) {
@@ -116,7 +130,9 @@ function putUserData($theuri) {
 		$thedate = str_replace('"', '', $thedate) ;
                 $datecheck = dateGreater($thedate);
                 if ($datecheck <> 0) {
-                    echo ('Date should be lower than today: ' . $thedate);
+                    //echo ('Date should be lower than today: ' . $thedate);
+                    header("HTTP/1.1 400 Bad Request");
+                    http_response_code(400);
                     exit();
                 }
                 
@@ -129,7 +145,8 @@ function putUserData($theuri) {
                 //echo $sql;
                 $updateressult = $pg->execquery($sql);
 		
-                echo ('Ressult:' . $updateressult);
+                //echo ('Ressult:' . $updateressult);
+                http_response_code(204);
             } else {
                 echo ('Date of bith should be YYYY-MM-DD' . "\n" ) ;
                 exit();
