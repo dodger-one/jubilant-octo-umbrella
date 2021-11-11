@@ -1,19 +1,26 @@
 <?php
-//phpinfo();
-//exit();
-//$pg = new PgSql();
+
+$theusername = '';
+$thedate = '';
+
+
+function checkUserName($theusername) {
+        if ( ! $theusername || strlen($theusername) < 3) {
+            echo ('Username must have at least 2 letters ->' . $theusername .  "<-\n") ;
+            return 1;
+        } elseif ( ! ctype_alpha($theusername) ) {
+            echo ('Username should have only letters ->' . $theusername .  "<-\n") ;
+            return 1;
+        } else {
+            return 0;
+        }
+}
 
 function getUserData($theuri) {
         $theusername = $theuri[2] ;
         $pg = new PgSql();
-        if ( ! $theusername || strlen($theusername) < 3) {
-            echo ('Username must have at least 2 letters ->' . $theusername .  "<-\n") ;
-            exit();
-        } elseif ( ! ctype_alpha($theusername) ) {
-        //if ( !isset($uri[2]) || ! preg_match("/^[a-zA-Z]{2,99}$/",$uri[2]) ) {
-            echo ('Username should have only letters ->' . $theusername .  "<-\n") ;
-            exit();
-        } else {
+        $userexists = checkUserName($theusername);
+        if ( $userexists == 0 ) {
             //echo ('Getting info from ' . $theusername . "\n" ) ;
             $sql = "SELECT * FROM revolut_test where thename = '" . $theusername . "';";
             $alldata = $pg->getRows($sql);
@@ -26,6 +33,10 @@ function getUserData($theuri) {
             } else {
                 sayMessage($alldata[0]);
             }
+        // this part can go inside testing part
+        } else {
+            echo ('User does not exists or is not valid') ;
+            exit();
         }
 }
 
@@ -62,34 +73,34 @@ function sayMessage($theinfo)
 
 function putUserData($theuri) {
         $pg = new PgSql();
-        //echo ( $uri[2] . "\n" . '<br>' . "\n" ) ;
         if ( !isset($theuri[2]) || ! preg_match("/^[a-zA-Z]{2,99}{\"dateOfBirth\":\"[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\"}$/",$theuri[2]) ) {
             echo ( 'Second parameter should be \'username{"dateOfBirth":"YYYY-MM-DD"}\'' . "\n" ) ;
             exit();
         } else {
             $wholedata = preg_split("/({|}|:)/", $theuri[2], -1, PREG_SPLIT_NO_EMPTY) ;
-            //print_r($wholedata);
             $theusername = $wholedata[0] ;
             $dateofbirth = $wholedata[1] ;
             $thedate = $wholedata[2] ;
-            if ( ! ctype_alpha($theusername) ) {
-                echo ('Username should have only letters' . "\n") ;
+
+            $userexists = checkUserName($theusername);
+            if ( $userexists <> 0 ) {
+                echo ('Username invalid ' . "\n") ;
                 exit();
-//            } else {
-//                echo ( '#################' . $theusername . "\n");
             }
             if ( $dateofbirth <> '"dateOfBirth"') {
                 echo ('you miss something important ->' . $dateofbirth . "<-\n" ) ;
                 exit();
             }
             if (preg_match("/^\"[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\"$/",$thedate)) {
+		$thedate = str_replace('"', '\'', $thedate) ;
                 echo ( 'theusername :' . $theusername . "\n");
                 echo ( 'thedate :' . $thedate . "\n") ;
 
-                $updateressult = $pg->insertOrUpdate($theusername, $thedate);
-                //$sql = 'INSERT INTO revolut_test(thename,date_of_birth) VALUES(' . $theusername . ',' . $thedate . ' ) ON CONFLICT (thename) DO UPDATE SET date_of_birth=' . $thedate ;
+                //$updateressult = $pg->insertOrUpdate($theusername, $thedate);
+                $sql = 'INSERT INTO revolut_test(thename,date_of_birth) VALUES(\'' . $theusername . '\',' . $thedate . ' ) ON CONFLICT (thename) DO UPDATE SET date_of_birth=' . $thedate ;
                 //echo $sql;
-                //$updateressult = $pg->insertOrUpdate($sql);
+                $updateressult = $pg->execquery($sql);
+		
                 echo ('Ressult:' . $updateressult);
             } else {
                 echo ('Date of bith should be YYYY-MM-DD' . "\n" ) ;
@@ -101,8 +112,8 @@ function putUserData($theuri) {
 // *************************************************************************************
 // *************************************************************************************
 //things to do
-//  * extract all the functions from index.php (create a revolut.php?)
-//  * the function insertOrUpdate should do raw upsert, the logic must be on revolut.php
+//  * OK: extract all the functions from index.php (create a revolut.php?)
+//  * OK: the function insertOrUpdate should do raw upsert, the logic must be on revolut.php
 //  * the date of birth should be checked (not greater than actual date...
 // *************************************************************************************
 // *************************************************************************************

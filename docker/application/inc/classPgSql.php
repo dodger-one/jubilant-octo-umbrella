@@ -16,10 +16,6 @@ class PgSql
         $hostname = $connectionarray[3] ;
         $port = $connectionarray[4] ;
         $dbname = $connectionarray[5] ;
-//        print_r ($connectionarray) ;
-//        echo ( ' host = ' . $hostname ) ;
-//        exit();
-        //$this->db = new PDO("pgsql:host=" . $hostname . ";port=" . $port . ";dbname=" . $dbname . ";user=" . $username . ";password=" . $password);
         $this->db = new PDO("pgsql:host=db;port=" . $port . ";dbname=" . $dbname . ";user=" . $username . ";password=" . $password);
         if (!$this->db) exit();
     }
@@ -45,6 +41,7 @@ class PgSql
         return $ressult;
     }
 
+
     //public function Upsert($theuser, $thedate)
     public function insertOrUpdate($theusername, $thedate)
     //public function insertOrUpdate($sql)
@@ -58,27 +55,22 @@ class PgSql
         return 0;
     }
 
-    // For INSERT
-    // Returns last insert $id
-    public function insert_old($sql, $id='id')
+    // 
+    // just execute any sql
+    public function execquery($sql)
     {
-        $sql = rtrim($sql, ';');
-        $sql .= ' RETURNING '.$id;
-        $result = pg_query($this->db, $sql);
-        if (pg_last_error()) exit(pg_last_error());
-        $this->last_id = pg_fetch_result($result, 0);
-        return $this->last_id;
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $sth = $this->db->prepare($sql);
+	try{ 
+        	$sth = $this->db->prepare($sql);
+	    	$ressult = $sth->execute();
+	} 
+	catch(PDOException $exception){ 
+		return $exception; 
+	} 
+	return 0;
     }
-
-    // For UPDATE, DELETE and CREATE TABLE
-    // Returns number of affected rows
-    public function exec($sql)
-    {
-        $result = pg_query($this->db, $sql);
-        if (pg_last_error()) exit(pg_last_error());
-        $this->aff_rows = pg_affected_rows($result);
-        return $this->aff_rows;
-    }
+    
 
 }
         
