@@ -71,6 +71,18 @@ function sayMessage($theinfo)
 //        exit();
 }
 
+function dateGreater($thedate)
+{
+        $today = date('Y-m-d');
+        if($thedate > $today) {
+            echo('greater');
+            return 1;
+        } else {
+            echo('lower');
+            return 0;
+        }
+}
+
 function putUserData($theuri) {
         $pg = new PgSql();
         if ( !isset($theuri[2]) || ! preg_match("/^[a-zA-Z]{2,99}{\"dateOfBirth\":\"[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\"}$/",$theuri[2]) ) {
@@ -92,12 +104,20 @@ function putUserData($theuri) {
                 exit();
             }
             if (preg_match("/^\"[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\"$/",$thedate)) {
-		$thedate = str_replace('"', '\'', $thedate) ;
-                echo ( 'theusername :' . $theusername . "\n");
-                echo ( 'thedate :' . $thedate . "\n") ;
+		//$thedate = str_replace('"', '\'', $thedate) ;
+		$thedate = str_replace('"', '', $thedate) ;
+                $datecheck = dateGreater($thedate);
+                if ($datecheck <> 0) {
+                    echo ('Date should be lower than today: ' . $thedate);
+                    exit();
+                }
+                
+
+                //echo ( 'theusername :' . $theusername . "\n");
+                //echo ( 'thedate :' . $thedate . "\n") ;
 
                 //$updateressult = $pg->insertOrUpdate($theusername, $thedate);
-                $sql = 'INSERT INTO revolut_test(thename,date_of_birth) VALUES(\'' . $theusername . '\',' . $thedate . ' ) ON CONFLICT (thename) DO UPDATE SET date_of_birth=' . $thedate ;
+                $sql = 'INSERT INTO revolut_test(thename,date_of_birth) VALUES(\'' . $theusername . '\',\'' . $thedate . '\' ) ON CONFLICT (thename) DO UPDATE SET date_of_birth=\'' . $thedate . '\'' ;
                 //echo $sql;
                 $updateressult = $pg->execquery($sql);
 		
