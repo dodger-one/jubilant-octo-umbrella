@@ -62,6 +62,9 @@ function getUserData($theuri) {
             if ( count($alldata) > 1 ) {
                 echo ('ERROR, more than 1 ressult found: ' . count($alldata)) ;
                 exit();
+            } else if (count($alldata) == 0) {
+                echo ('User not found') ;
+                exit();
             } else {
                 sayMessage($alldata[0]);
             }
@@ -91,10 +94,6 @@ function sayMessage($theinfo)
                 if ($mtoday > $mbirth || ($mtoday == $mbirth && $dtoday > $dbirth) ) {
                         // birthday has pass this year
                         $daysdiff=365-$daysdiff;
-//                } else {
-//                        // birthday has pass this year
-//                        echo ('we have the date already here:' . $datediff);
-//                        //$daysdiff=365-$daysdiff;
                 }
                 $message = array("message"=>"Hello, ". $theinfo['thename'] . '! Your birthday is in ' . $daysdiff . ' day(s)');
 
