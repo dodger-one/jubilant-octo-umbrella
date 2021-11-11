@@ -1,0 +1,59 @@
+# docker-compose.yaml
+version: '3'
+
+services:
+  php-fpm:
+    build:
+      context: .
+      dockerfile: docker/php-fpm/Dockerfile
+    container_name: php-fpm
+    tty: true
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://revolut:thisisnotthepassword@127.0.0.1:5432/revolutdb
+    working_dir: /var/www
+    volumes:
+      - application:/var/www/public
+#      - ./:/var/www
+    ports:
+      - "19000:9000"
+
+  webserver:
+    build:
+        context: .
+        dockerfile: docker/nginx/Dockerfile
+    container_name: webserver
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - php-fpm
+    working_dir: /var/www
+    volumes:
+      - application:/var/www/public
+#      - ./:/var/www
+#      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+#      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+    links:
+      - php-fpm
+
+  db:
+    build:
+        context: .
+        dockerfile: docker/db/Dockerfile
+    container_name: db
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: thisisnotthepassword
+      POSTGRES_USER: revolut
+      POSTGRES_DB: revolutdb
+    ports:
+      - "54320:5432"
+
+volumes:
+  db_data:
+  application:
+
