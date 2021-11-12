@@ -3,6 +3,9 @@
 $theusername = '';
 $thedate = '';
 
+// 
+// Check that the Uri contains 'hello' in the correct position
+// 
 function hellocheck($theuri){
     if (isset($theuri[1]) && $theuri[1] != 'hello') {
         header("HTTP/1.1 404 Not Found");
@@ -12,6 +15,9 @@ function hellocheck($theuri){
     }
 }
 
+//
+//Check that the username is valid (as requirements)
+//
 function checkUserName($theusername) {
         if ( ! $theusername || strlen($theusername) < 3) {
             //echo ('Username must have at least 2 letters ->' . $theusername .  "<-\n") ;
@@ -24,6 +30,26 @@ function checkUserName($theusername) {
         }
 }
 
+//
+//Check that the provisioned date is greater or not that current date
+//
+function dateGreater($thedate)
+{
+        $today = date('Y-m-d');
+        if($thedate > $today) {
+            //echo('greater');
+            return 1;
+        } else {
+            //echo('lower');
+            return 0;
+        }
+}
+
+
+
+//
+//Get user data from database checking the requirements
+//
 function getUserData($theuri) {
         $theusername = $theuri[2] ;
         $pg = new PgSql();
@@ -54,6 +80,9 @@ function getUserData($theuri) {
         }
 }
 
+//
+//Return the json requested by the tests
+//
 function sayMessage($theinfo)
 {
 // Revolut test expected ressults
@@ -86,18 +115,9 @@ function sayMessage($theinfo)
         exit();
 }
 
-function dateGreater($thedate)
-{
-        $today = date('Y-m-d');
-        if($thedate > $today) {
-            //echo('greater');
-            return 1;
-        } else {
-            //echo('lower');
-            return 0;
-        }
-}
-
+//
+//Write data to the database
+//
 function putUserData($theuri) {
         $pg = new PgSql();
         if ( !isset($theuri[2]) || ! preg_match("/^[a-zA-Z]{2,99}{\"dateOfBirth\":\"[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\"}$/",$theuri[2]) ) {
@@ -136,7 +156,6 @@ function putUserData($theuri) {
                     exit();
                 }
                 
-
                 //echo ( 'theusername :' . $theusername . "\n");
                 //echo ( 'thedate :' . $thedate . "\n") ;
 
@@ -153,13 +172,3 @@ function putUserData($theuri) {
             }
         }
 }
-// *************************************************************************************
-// *************************************************************************************
-// *************************************************************************************
-//things to do
-//  * OK: extract all the functions from index.php (create a revolut.php?)
-//  * OK: the function insertOrUpdate should do raw upsert, the logic must be on revolut.php
-//  * OK: the date of birth should be checked (not greater than actual date...
-// *************************************************************************************
-// *************************************************************************************
-// *************************************************************************************
