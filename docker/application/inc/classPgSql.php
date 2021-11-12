@@ -42,19 +42,6 @@ class PgSql
     }
 
 
-    //public function Upsert($theuser, $thedate)
-    public function insertOrUpdate($theusername, $thedate)
-    //public function insertOrUpdate($sql)
-    {
-        //echo ('Username: ' . $theusername);
-        $sql = 'INSERT INTO revolut_test(thename,date_of_birth) VALUES(:theuser,:thedate) ON CONFLICT (thename) DO UPDATE SET date_of_birth=:thedate ';
-        $sth = $this->db->prepare($sql);
-        $sth->bindValue(':theuser', $theusername);
-        $sth->bindValue(':thedate', $thedate);
-        $sth->execute();
-        return 0;
-    }
-
     // 
     // just execute any sql
     public function execquery($sql)
